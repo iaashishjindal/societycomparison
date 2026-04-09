@@ -22,6 +22,8 @@ Thumbs.db
 # Build
 /dist/
 /build/
+client/dist/
+server/dist/
 
 # Logs
 npm-debug.log*
