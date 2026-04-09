@@ -13,19 +13,32 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Configure CORS origins
+const corsOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+
+// Add production frontend URL if set
+if (process.env.FRONTEND_URL) {
+  corsOrigins.push(process.env.FRONTEND_URL);
+}
+
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: corsOrigins,
   credentials: true,
 }));
 app.use(express.json());
 app.use(session({
-  secret: 'your-secret-key',
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
   cookie: { 
     maxAge: 24 * 60 * 60 * 1000,
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
   },
 }));
 
@@ -48,6 +61,8 @@ const startServer = async () => {
     
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`CORS enabled for:`, corsOrigins);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
