@@ -8,7 +8,11 @@
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
-  "keywords": ["society", "maintenance", "benchmarking"],
+  "keywords": [
+    "society",
+    "maintenance",
+    "benchmarking"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {

@@ -1,50 +1,51 @@
 import express from 'express';
+import { checkAdminAuth } from '../middleware/auth.js';
 import {
   createSociety,
   updateSociety,
   deleteSociety,
+  getSocieties,
 } from '../controllers/societyController.js';
 import {
+  updateSocietyBenchmarks,
   getSocietyBenchmarks,
-  saveSocietyBenchmark,
-  saveBulkBenchmarks,
+  getBenchmarks,
 } from '../controllers/benchmarkController.js';
-import { adminAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Admin authentication
+// Admin login
 router.post('/login', (req, res) => {
   const { password } = req.body;
-
-  if (password === 'admin123') {
+  if (password === process.env.ADMIN_PASSWORD) {
     req.session.isAdmin = true;
-    res.json({ success: true, message: 'Admin logged in' });
+    res.json({ message: 'Logged in' });
   } else {
     res.status(401).json({ error: 'Invalid password' });
   }
 });
 
 router.post('/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({ error: 'Logout failed' });
-    }
-    res.json({ success: true, message: 'Logged out' });
-  });
+  req.session.destroy();
+  res.json({ message: 'Logged out' });
 });
 
-// Protected routes (require admin auth)
-router.use(adminAuth);
+router.get('/check', (req, res) => {
+  res.json({ isAdmin: req.session.isAdmin || false });
+});
+
+// Protected routes
+router.use(checkAdminAuth);
 
 // Society management
 router.post('/societies', createSociety);
+router.get('/societies', getSocieties);
 router.put('/societies/:id', updateSociety);
 router.delete('/societies/:id', deleteSociety);
 
 // Benchmark management
+router.get('/benchmarks', getBenchmarks);
 router.get('/benchmarks/:societyId', getSocietyBenchmarks);
-router.post('/benchmarks/:societyId', saveSocietyBenchmark);
-router.post('/benchmarks/:societyId/bulk', saveBulkBenchmarks);
+router.post('/benchmarks/:societyId', updateSocietyBenchmarks);
 
 export default router;

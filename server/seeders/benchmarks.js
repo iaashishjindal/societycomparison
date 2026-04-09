@@ -1,136 +1,131 @@
-import Benchmark from '../models/Benchmark.js';
-
-const benchmarkData = [
+export const benchmarkData = [
   // Building & Maintenance
   {
-    name: 'Annual building maintenance & repairs',
+    name: 'Annual Building Maintenance',
+    description: 'General maintenance and repairs to building structure',
     category: 'Building & Maintenance',
-    description: 'Maintenance and repair costs for building structure',
     unit: 'per sq ft',
   },
   {
-    name: 'Painting & whitewashing',
+    name: 'Painting & Whitewashing',
+    description: 'Periodic painting and whitewashing of common areas',
     category: 'Building & Maintenance',
-    description: 'External and internal painting costs',
     unit: 'per sq ft',
   },
   {
-    name: 'Pest control & pest management',
+    name: 'Pest Control',
+    description: 'Regular pest control and management',
     category: 'Building & Maintenance',
-    description: 'Regular pest control and fumigation',
-    unit: 'per unit',
+    unit: 'per sq ft',
   },
   {
-    name: 'Lift maintenance',
+    name: 'Lift Maintenance',
+    description: 'Maintenance and servicing of elevators',
     category: 'Building & Maintenance',
-    description: 'Elevator/lift maintenance and repairs',
-    unit: 'per unit',
+    unit: 'per sq ft',
   },
-
+  
   // Utilities
   {
-    name: 'Water supply & treatment',
+    name: 'Water Supply & Treatment',
+    description: 'Water supply, treatment, and distribution',
     category: 'Utilities',
-    description: 'Water supply, treatment, and maintenance',
     unit: 'per sq ft',
   },
   {
-    name: 'Electricity for common areas',
+    name: 'Electricity - Common Areas',
+    description: 'Electricity for common areas and facilities',
     category: 'Utilities',
-    description: 'Common area electricity costs',
     unit: 'per sq ft',
   },
   {
-    name: 'Sewage treatment',
+    name: 'Sewage Treatment',
+    description: 'Sewage treatment and management',
     category: 'Utilities',
-    description: 'Sewage treatment plant maintenance',
-    unit: 'per unit',
+    unit: 'per sq ft',
   },
-
+  
   // Security & Safety
   {
-    name: 'Security staff salaries',
+    name: 'Security Staff Salaries',
+    description: 'Salaries for security personnel',
     category: 'Security & Safety',
-    description: 'Guards and security personnel',
-    unit: 'per unit',
-  },
-  {
-    name: 'CCTV & monitoring',
-    category: 'Security & Safety',
-    description: 'CCTV installation and monitoring',
     unit: 'per sq ft',
   },
   {
-    name: 'Fire safety & alarms',
+    name: 'CCTV & Monitoring',
+    description: 'CCTV system maintenance and monitoring',
     category: 'Security & Safety',
-    description: 'Fire safety equipment and alarms',
     unit: 'per sq ft',
   },
   {
-    name: 'Gate maintenance',
+    name: 'Fire Safety & Alarms',
+    description: 'Fire safety systems and alarm maintenance',
     category: 'Security & Safety',
-    description: 'Entry gate and access control',
-    unit: 'per unit',
+    unit: 'per sq ft',
   },
-
+  {
+    name: 'Gate Maintenance',
+    description: 'Gate and access control system maintenance',
+    category: 'Security & Safety',
+    unit: 'per sq ft',
+  },
+  
   // Amenities & Recreation
   {
-    name: 'Garden & landscaping',
-    category: 'Amenities & Recreation',
+    name: 'Garden & Landscaping',
     description: 'Garden maintenance and landscaping',
+    category: 'Amenities & Recreation',
     unit: 'per sq ft',
   },
   {
-    name: 'Swimming pool maintenance',
+    name: 'Swimming Pool Maintenance',
+    description: 'Swimming pool maintenance and chemicals',
     category: 'Amenities & Recreation',
-    description: 'Pool cleaning, chemicals, and maintenance',
-    unit: 'per unit',
+    unit: 'per sq ft',
   },
   {
-    name: 'Gym facility maintenance',
+    name: 'Gym Maintenance',
+    description: 'Gym equipment maintenance',
     category: 'Amenities & Recreation',
-    description: 'Gym equipment and facility maintenance',
-    unit: 'per unit',
+    unit: 'per sq ft',
   },
-
+  
   // Administration
   {
-    name: 'Staff salaries - Admin & Cleaner',
+    name: 'Administrative Staff',
+    description: 'Salaries for administrative and office staff',
     category: 'Administration',
-    description: 'Administrative staff and cleaning personnel',
-    unit: 'per unit',
-  },
-  {
-    name: 'Office supplies & insurance',
-    category: 'Administration',
-    description: 'Office supplies, insurance premiums',
     unit: 'per sq ft',
   },
   {
-    name: 'Legal & compliance',
+    name: 'Office Supplies & Insurance',
+    description: 'Office supplies and general insurance',
     category: 'Administration',
-    description: 'Legal fees and regulatory compliance',
-    unit: 'per unit',
+    unit: 'per sq ft',
   },
   {
-    name: 'Reserve fund contribution',
+    name: 'Legal & Compliance',
+    description: 'Legal fees and compliance management',
     category: 'Administration',
-    description: 'Reserve fund for future maintenance',
+    unit: 'per sq ft',
+  },
+  {
+    name: 'Reserve Fund',
+    description: 'Contribution to reserve fund for future expenses',
+    category: 'Administration',
     unit: 'per sq ft',
   },
 ];
 
-export const seedBenchmarks = async () => {
+export const seedBenchmarks = async (Benchmark) => {
   try {
-    const existingCount = await Benchmark.countDocuments();
-    if (existingCount > 0) {
-      console.log('✓ Benchmarks already seeded, skipping...');
-      return;
+    const count = await Benchmark.countDocuments();
+    if (count === 0) {
+      await Benchmark.insertMany(benchmarkData);
+      console.log('Benchmarks seeded successfully');
     }
-
-    await Benchmark.insertMany(benchmarkData);
-    console.log(`✓ Seeded ${benchmarkData.length} benchmarks`);
   } catch (error) {
-    console.error('✗ Error seeding benchmarks:', error.message);
+    console.error('Error seeding benchmarks:', error);
   }
 };

@@ -1,40 +1,25 @@
 import mongoose from 'mongoose';
 
-const benchmarkSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-    },
-    description: {
-      type: String,
-      default: '',
-    },
-    category: {
-      type: String,
-      enum: [
-        'Building & Maintenance',
-        'Utilities',
-        'Security & Safety',
-        'Amenities & Recreation',
-        'Administration',
-      ],
-      required: true,
-    },
-    unit: {
-      type: String,
-      enum: ['per sq ft', 'per unit', 'percentage', 'per month'],
-      default: 'per sq ft',
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+const benchmarkSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    unique: true,
   },
-  { timestamps: true }
-);
+  description: String,
+  category: {
+    type: String,
+    enum: ['Building & Maintenance', 'Utilities', 'Security & Safety', 'Amenities & Recreation', 'Administration'],
+    required: true,
+  },
+  unit: {
+    type: String,
+    default: 'per sq ft',
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
-const Benchmark = mongoose.model('Benchmark', benchmarkSchema);
-export default Benchmark;
+export default mongoose.model('Benchmark', benchmarkSchema);

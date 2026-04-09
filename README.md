@@ -1,245 +1,239 @@
 # Society Maintenance Charges Benchmarking System
 
-A web application to help societies justify maintenance charges by benchmarking against similar societies in nearby areas.
+A comprehensive web application to benchmark maintenance charges across multiple residential societies. This tool helps justify maintenance charges by comparing them with similar societies in nearby areas.
 
 ## Features
 
-- **Public Dashboard**: View societies, compare maintenance charges, and analyze trends
-- **Admin Panel**: Manage societies and benchmark data (password: `admin123`)
-- **Intermediate Analytics**: Charts, trends, outlier detection, and statistical analysis
-- **Responsive Design**: Works on desktop and mobile devices
+- **Public Dashboard**: View and compare maintenance charges across societies
+- **Benchmarking Data**: Pre-defined categories covering Building & Maintenance, Utilities, Security & Safety, Amenities, and Administration
+- **Admin Panel**: Add societies and maintenance charge data (password protected)
+- **Comparison Table**: Filter and sort societies by location, number of flats, and area
+- **Analytics & Insights**: 
+  - Statistical analysis (mean, median, standard deviation)
+  - Outlier detection for unusually high/low charges
+  - Trend visualization
+  - Charge distribution charts
 
 ## Tech Stack
 
-- **Frontend**: React + Vite + Recharts
-- **Backend**: Node.js + Express
+- **Frontend**: React 18 + Vite + Recharts
+- **Backend**: Node.js + Express.js
 - **Database**: MongoDB
-- **Authentication**: Session-based (fixed admin password)
+- **Session Management**: Express-session
 
-## Quick Start
+## Prerequisites
 
-### Prerequisites
-
-- Node.js (v14 or higher)
+- Node.js (v16 or higher)
 - npm or yarn
-- Docker & Docker Compose (for MongoDB)
+- MongoDB (or Docker for local setup)
+- Git
 
-### Installation & Setup
+## Installation & Setup
 
-#### 1. Start MongoDB
+### 1. Start MongoDB
 
+Using Docker (recommended):
 ```bash
 docker-compose up -d
 ```
 
-This will start MongoDB with:
-- URL: `mongodb://localhost:27017`
-- Admin user: `admin`
-- Password: `admin123`
-- Database: `societycomparison`
+Or install MongoDB locally and ensure it's running on `mongodb://localhost:27017`
 
-#### 2. Backend Setup
+### 2. Setup Backend
 
 ```bash
 cd server
 npm install
-npm start
+npm run dev
 ```
 
-The backend will:
-- Connect to MongoDB
-- Seed initial benchmark categories
-- Start on `http://localhost:5000`
+The backend will start on `http://localhost:5000` and automatically seed benchmark categories on first run.
 
-#### 3. Frontend Setup
+### 3. Setup Frontend
 
 In a new terminal:
-
 ```bash
 cd client
 npm install
 npm run dev
 ```
 
-Frontend will be available at `http://localhost:5173`
+The frontend will start on `http://localhost:5173`
+
+## Usage
+
+### As a Public User
+
+1. Open `http://localhost:5173` in your browser
+2. **Home**: View system overview and quick links
+3. **Comparison**: See a table of all societies with benchmark data
+   - Filter by location, number of flats, or area
+   - Sort by different criteria
+4. **Insights**: View analytics and trends
+   - Statistical summaries for each benchmark
+   - Outlier detection
+   - Trend charts
+
+### As an Admin
+
+1. Go to `http://localhost:5173/admin`
+2. Click "Admin" in the header and login with password: `admin123`
+3. **Manage Societies Tab**:
+   - Add new societies with name, location, number of flats, and total area
+   - View and delete existing societies
+4. **Manage Benchmarks Tab**:
+   - Select a society
+   - Enter maintenance charge values for each benchmark category
+   - Values should be in rupees per square foot
 
 ## API Endpoints
 
 ### Public Routes
+- `GET /api/societies` - List all societies
+- `GET /api/societies/:id` - Get single society with benchmarks
+- `GET /api/benchmarks` - List all benchmark categories
+- `GET /api/comparison` - Get comparison data for all societies
+- `GET /api/insights` - Get statistical insights
+- `GET /api/trends` - Get trend data
+
+### Admin Routes
+- `POST /api/admin/login` - Admin authentication
+- `POST /api/admin/logout` - Logout
+- `GET /api/admin/check` - Check authentication status
+- `POST /api/admin/societies` - Create society
+- `PUT /api/admin/societies/:id` - Update society
+- `DELETE /api/admin/societies/:id` - Delete society
+- `GET /api/admin/benchmarks` - Get benchmark templates
+- `GET /api/admin/benchmarks/:societyId` - Get society's benchmark data
+- `POST /api/admin/benchmarks/:societyId` - Update benchmark data
+
+## Default Benchmark Categories
+
+### Building & Maintenance
+- Annual Building Maintenance
+- Painting & Whitewashing
+- Pest Control
+- Lift Maintenance
+
+### Utilities
+- Water Supply & Treatment
+- Electricity - Common Areas
+- Sewage Treatment
+
+### Security & Safety
+- Security Staff Salaries
+- CCTV & Monitoring
+- Fire Safety & Alarms
+- Gate Maintenance
+
+### Amenities & Recreation
+- Garden & Landscaping
+- Swimming Pool Maintenance
+- Gym Maintenance
+
+### Administration
+- Administrative Staff
+- Office Supplies & Insurance
+- Legal & Compliance
+- Reserve Fund
+
+## Environment Variables
+
+Create a `.env` file in the `server` directory:
 
 ```
-GET  /api/societies              - List all societies
-GET  /api/societies/:id         - Get society with benchmarks
-GET  /api/benchmarks            - List all benchmarks
-GET  /api/benchmarks-by-category - Get benchmarks grouped by category
-GET  /api/comparison            - Compare societies with filters
-GET  /api/insights/society/:id  - Get society-specific insights
-GET  /api/insights/summary      - Get summary statistics
+MONGODB_URI=mongodb://localhost:27017/society-comparison
+PORT=5000
+NODE_ENV=development
+ADMIN_PASSWORD=admin123
 ```
 
-### Admin Routes (Protected)
-
-```
-POST /api/admin/login                - Admin login (password: admin123)
-POST /api/admin/logout               - Admin logout
-POST /api/admin/societies            - Create society
-PUT  /api/admin/societies/:id       - Update society
-DELETE /api/admin/societies/:id     - Delete society
-GET  /api/admin/benchmarks/:societyId - Get society benchmarks
-POST /api/admin/benchmarks/:societyId - Save benchmark value
-POST /api/admin/benchmarks/:societyId/bulk - Bulk save benchmarks
-```
-
-## Usage
-
-### Admin Panel
-
-1. Go to home page and click "Admin Access"
-2. Enter password: `admin123`
-3. You can now:
-   - **Manage Societies**: Add, edit, delete societies
-   - **Manage Benchmarks**: Enter benchmark values for each society
-
-### Public Views
-
-- **Home**: Overview of total societies and average maintenance charges
-- **Comparison**: Compare maintenance charges across societies with filters
-- **Insights**: View charts, trends, and statistical analysis
-
-## Pre-defined Benchmarks
-
-The system comes with 17 pre-defined benchmark categories across 5 main areas:
-
-1. **Building & Maintenance** (4 benchmarks)
-   - Annual building maintenance & repairs
-   - Painting & whitewashing
-   - Pest control & pest management
-   - Lift maintenance
-
-2. **Utilities** (3 benchmarks)
-   - Water supply & treatment
-   - Electricity for common areas
-   - Sewage treatment
-
-3. **Security & Safety** (4 benchmarks)
-   - Security staff salaries
-   - CCTV & monitoring
-   - Fire safety & alarms
-   - Gate maintenance
-
-4. **Amenities & Recreation** (3 benchmarks)
-   - Garden & landscaping
-   - Swimming pool maintenance
-   - Gym facility maintenance
-
-5. **Administration** (4 benchmarks)
-   - Staff salaries (Admin & Cleaner)
-   - Office supplies & insurance
-   - Legal & compliance
-   - Reserve fund contribution
-
-## Features in Detail
-
-### Comparison Page
-
-- **Filters**: Filter societies by location, number of flats, and area
-- **Society Table**: View all societies with key metrics
-- **Benchmark Comparison**: Compare specific benchmarks across all societies
-- **Outlier Detection**: Identify societies with unusually high/low charges
-
-### Insights Page
-
-- **Interactive Charts**: Bar charts showing distribution of charges
-- **Statistical Analysis**: Average, median, min, max, and standard deviation
-- **Category Analysis**: Compare average costs across different categories
-- **Percentage Variance**: See how each society compares to the average
-
-### Admin Panel
-
-- **Society Management**: Full CRUD operations for societies
-- **Benchmark Data Entry**: Easy form to enter benchmark values
-- **Bulk Operations**: Save all benchmarks at once for a society
-
-## Troubleshooting
-
-### MongoDB Connection Issues
-
-```bash
-# Check if MongoDB is running
-docker ps
-
-# View MongoDB logs
-docker-compose logs mongodb
-
-# Restart MongoDB
-docker-compose restart mongodb
-```
-
-### Backend Won't Start
-
-```bash
-# Clear node_modules and reinstall
-cd server
-rm -rf node_modules package-lock.json
-npm install
-npm start
-```
-
-### Frontend Won't Load
-
-```bash
-# Clear cache and reinstall
-cd client
-rm -rf node_modules package-lock.json
-npm install
-npm run dev
-```
-
-## File Structure
+## Project Structure
 
 ```
 societycomparison/
-├── server/
-│   ├── models/           # MongoDB schemas
-│   ├── controllers/      # Business logic
-│   ├── routes/           # API endpoints
-│   ├── middleware/       # Authentication
-│   ├── config/           # Database config
-│   ├── seeders/          # Initial data
-│   ├── index.js          # Entry point
+├── server/                    # Node.js/Express backend
+│   ├── config/               # Configuration files
+│   ├── models/               # MongoDB schemas
+│   ├── routes/               # API routes
+│   ├── controllers/          # Business logic
+│   ├── middleware/           # Authentication middleware
+│   ├── seeders/              # Database seeders
+│   ├── index.js             # Main server file
 │   └── package.json
-├── client/
+│
+├── client/                    # React frontend
 │   ├── src/
-│   │   ├── pages/        # React pages
-│   │   ├── components/   # Reusable components
-│   │   ├── services/     # API client
-│   │   ├── context/      # Global state
+│   │   ├── pages/           # Page components
+│   │   ├── services/        # API client
+│   │   ├── context/         # Auth context
 │   │   ├── App.jsx
 │   │   ├── main.jsx
 │   │   └── index.css
 │   ├── index.html
 │   ├── vite.config.js
 │   └── package.json
-├── docker-compose.yml
-├── .gitignore
-└── README.md
+│
+├── docker-compose.yml         # MongoDB setup
+├── README.md                  # This file
+└── .gitignore
 ```
 
-## Default Admin Credentials
+## Testing the Application
 
-- **Username**: Admin
-- **Password**: `admin123`
+### Sample Data Flow
 
-⚠️ **Security Note**: Change the password in `server/routes/adminRoutes.js` before deploying to production.
+1. **Add a Society**:
+   - Admin → Manage Societies → Fill in details
+   - Example: Green Valley Apts, Sector 57, 250 flats, 500,000 sq ft
+
+2. **Add Benchmark Data**:
+   - Admin → Manage Benchmarks → Select society
+   - Fill in maintenance charges per sq ft for each category
+   - Example: Building Maintenance = ₹2.5/sq ft
+
+3. **View Comparisons**:
+   - Go to Comparison page → See your society in the table
+   - Compare with other added societies
+
+4. **View Insights**:
+   - Go to Insights page → See statistics and outlier analysis
+   - Identify if your society's charges are reasonable
+
+## Security Notes
+
+- Admin password is hardcoded for simplicity (change in production)
+- Session cookies use httpOnly flag
+- CORS is restricted to localhost:5173
+- Implement proper authentication in production (JWT, OAuth, etc.)
 
 ## Future Enhancements
 
-- User accounts and role-based access
-- Export reports (PDF/Excel)
+- User accounts with role-based access
 - Historical tracking of charges over time
-- ML-based cost recommendations
+- Export comparison reports as PDF
+- Machine learning-based recommendations
 - Mobile app
 - Email notifications
+- Advanced analytics and predictive models
+
+## Troubleshooting
+
+### MongoDB Connection Failed
+- Ensure MongoDB is running: `docker-compose up -d`
+- Check MongoDB URI in `.env` file
+
+### Port Already in Use
+- Backend: Change PORT in `.env` and update frontend API URL
+- Frontend: Update port in `vite.config.js`
+
+### CORS Errors
+- Ensure frontend is on `http://localhost:5173`
+- Backend CORS is configured for this URL
+
+### Admin Login Not Working
+- Default password: `admin123`
+- Check `.env` file for correct password
 
 ## License
 
@@ -247,4 +241,4 @@ ISC
 
 ## Support
 
-For issues or questions, please refer to the plan file at `/root/.claude/plans/peppy-twirling-manatee.md` or check the application logs.
+For issues or questions, please check the application logs and ensure all services are running correctly.

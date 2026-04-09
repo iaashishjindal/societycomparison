@@ -1,176 +1,82 @@
-import { useEffect, useState } from 'react';
-import { getSummaryStats } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { publicAPI } from '../services/api';
 
-function Home() {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { isAdmin, login } = useAuth();
-  const navigate = useNavigate();
+export default function Home() {
+  const [stats, setStats] = useState({ societies: 0, benchmarks: 0 });
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const loadStats = async () => {
       try {
-        const res = await getSummaryStats();
-        setStats(res.data);
-      } catch (err) {
-        console.error('Error fetching stats:', err);
-      } finally {
-        setLoading(false);
+        const [societiesRes, benchmarksRes] = await Promise.all([
+          publicAPI.getSocieties(),
+          publicAPI.getBenchmarks(),
+        ]);
+
+        setStats({
+          societies: societiesRes.data.length,
+          benchmarks: benchmarksRes.data.length,
+        });
+      } catch (error) {
+        console.error('Failed to load stats:', error);
       }
     };
 
-    fetchStats();
+    loadStats();
   }, []);
 
-  const handleAdminLogin = async (e) => {
-    e.preventDefault();
-    try {
-      await login(password);
-      setShowLoginModal(false);
-      setPassword('');
-      setError('');
-      navigate('/admin');
-    } catch (err) {
-      setError('Invalid password');
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="page">
-        <div className="loading">
-          <div className="loader"></div>
-          Loading...
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <>
-      <div className="page">
-        <h1>🏢 Society Maintenance Charges Benchmarking</h1>
+    <div className="container">
+      <div className="card">
+        <h2>Welcome to Society Maintenance Benchmarking</h2>
+        <p style={{ marginBottom: '20px', lineHeight: '1.6' }}>
+          This platform helps you benchmark maintenance charges across similar societies in your area.
+          It provides comprehensive data comparison and insights to justify or adjust maintenance charges fairly.
+        </p>
 
-        <div style={{ marginBottom: '2rem', lineHeight: '1.8' }}>
-          <p>
-            Welcome to the Society Maintenance Charges Benchmarking Platform! This tool helps
-            justify maintenance charges by comparing them with similar societies in nearby areas.
-          </p>
-          <p style={{ marginTop: '1rem' }}>
-            <strong>How it works:</strong>
-          </p>
-          <ul style={{ marginLeft: '2rem', marginTop: '0.5rem' }}>
-            <li>View and compare maintenance charges across multiple societies</li>
-            <li>Analyze insights and trends in maintenance costs</li>
-            <li>Understand how your society's charges compare to similar properties</li>
+        <div className="stats-grid">
+          <div className="stat-box">
+            <h3>Total Societies</h3>
+            <div className="value">{stats.societies}</div>
+          </div>
+          <div className="stat-box">
+            <h3>Benchmark Categories</h3>
+            <div className="value">{stats.benchmarks}</div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: '30px' }}>
+          <h3>Quick Links</h3>
+          <ul style={{ marginLeft: '20px', marginTop: '15px' }}>
+            <li style={{ marginBottom: '10px' }}>
+              <Link to="/comparison">View Comparison Data</Link> - See how your society compares with others
+            </li>
+            <li style={{ marginBottom: '10px' }}>
+              <Link to="/insights">View Analytics & Insights</Link> - Understand trends and outliers
+            </li>
+            <li>
+              <Link to="/admin">Admin Panel</Link> - Add societies and benchmark data (requires password)
+            </li>
           </ul>
         </div>
 
-        <h2>Overview</h2>
-        <div className="cards-grid">
-          <div className="card">
-            <div className="stat">
-              <div className="stat-value">{stats?.totalSocieties || 0}</div>
-              <div className="stat-label">Societies</div>
-            </div>
-          </div>
-          <div className="card">
-            <div className="stat">
-              <div className="stat-value">₹{stats?.avgMaintenanceCharge?.toFixed(2) || 0}</div>
-              <div className="stat-label">Avg Maintenance (per sq ft)</div>
-            </div>
-          </div>
-          <div className="card">
-            <div className="stat">
-              <div className="stat-value">{stats?.avgFlats || 0}</div>
-              <div className="stat-label">Avg Units</div>
-            </div>
-          </div>
-          <div className="card">
-            <div className="stat">
-              <div className="stat-value">{stats?.avgArea?.toLocaleString() || 0}</div>
-              <div className="stat-label">Avg Area (sq ft)</div>
-            </div>
-          </div>
-        </div>
-
-        <h2>Quick Links</h2>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1rem' }}>
-          <button
-            onClick={() => navigate('/comparison')}
-            className="btn btn-primary"
-          >
-            📊 View Comparisons
-          </button>
-          <button
-            onClick={() => navigate('/insights')}
-            className="btn btn-primary"
-          >
-            📈 View Insights & Trends
-          </button>
-          {!isAdmin && (
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="btn btn-secondary"
-            >
-              🔐 Admin Access
-            </button>
-          )}
-          {isAdmin && (
-            <button
-              onClick={() => navigate('/admin')}
-              className="btn btn-success"
-            >
-              ⚙️ Admin Panel
-            </button>
-          )}
+        <div style={{ marginTop: '30px', padding: '15px', backgroundColor: '#ecf0f1', borderRadius: '4px' }}>
+          <h3>About Benchmarks</h3>
+          <p style={{ marginTop: '10px' }}>
+            Benchmarks are grouped into five main categories:
+          </p>
+          <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
+            <li>Building & Maintenance</li>
+            <li>Utilities</li>
+            <li>Security & Safety</li>
+            <li>Amenities & Recreation</li>
+            <li>Administration</li>
+          </ul>
+          <p style={{ marginTop: '15px' }}>
+            Each category contains several specific cost items that contribute to the total maintenance charges.
+          </p>
         </div>
       </div>
-
-      {/* Admin Login Modal */}
-      {showLoginModal && (
-        <div className="modal open">
-          <div className="modal-content">
-            <h2>Admin Login</h2>
-            <form onSubmit={handleAdminLogin}>
-              {error && <div className="alert alert-error">{error}</div>}
-              <div className="form-group">
-                <label>Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter admin password"
-                  required
-                />
-              </div>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <button type="submit" className="btn btn-primary">
-                  Login
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowLoginModal(false);
-                    setPassword('');
-                    setError('');
-                  }}
-                  className="btn btn-secondary"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 }
-
-export default Home;

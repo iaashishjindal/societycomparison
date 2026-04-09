@@ -1,44 +1,29 @@
 import mongoose from 'mongoose';
 
-const societySchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    location: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    totalFlats: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-    totalArea: {
-      type: Number,
-      required: true,
-      min: 1,
-      description: 'Total area in square feet',
-    },
-    yearEstablished: {
-      type: Number,
-      required: true,
-      min: 1900,
-      max: new Date().getFullYear(),
-    },
-    isDeleted: {
-      type: Boolean,
-      default: false,
-    },
+const societySchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
   },
-  { timestamps: true }
-);
+  location: String,
+  totalFlats: {
+    type: Number,
+    required: true,
+  },
+  totalArea: {
+    type: Number,
+    required: true,
+    description: 'Total area in square feet',
+  },
+  yearEstablished: Number,
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
-// Index for faster queries
-societySchema.index({ isDeleted: 1, location: 1 });
-
-const Society = mongoose.model('Society', societySchema);
-export default Society;
+export default mongoose.model('Society', societySchema);

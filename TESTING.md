@@ -1,278 +1,350 @@
-# Testing Guide - Society Maintenance Charges Benchmarking System
+# Testing Guide - Society Maintenance Benchmarking System
 
-This document provides step-by-step instructions to test the complete application.
+## Quick Start Testing
 
-## Prerequisites
+### Prerequisites
+- Have all 3 services running:
+  - MongoDB: `docker-compose up -d`
+  - Backend: `cd server && npm run dev` (Terminal 1)
+  - Frontend: `cd client && npm run dev` (Terminal 2)
 
-- Node.js installed
-- MongoDB running (via Docker or local installation)
-- Ports 5000 (backend) and 5173 (frontend) available
+## Test Scenarios
 
-## Setup for Testing
+### 1. Public User Journey
 
-### 1. Start MongoDB
-
-**Option A: Using Docker (Recommended)**
-```bash
-docker-compose up -d
-```
-
-**Option B: Local MongoDB**
-Ensure MongoDB is running on `mongodb://localhost:27017`
-
-### 2. Start Backend Server
-
-```bash
-cd server
-npm install  # if not done already
-npm start
-```
-
-Expected output:
-```
-✓ MongoDB connected successfully
-✓ Seeded 17 benchmarks
-✓ Server running on http://localhost:5000
-✓ API available at http://localhost:5000/api
-✓ Admin API available at http://localhost:5000/api/admin
-```
-
-### 3. Start Frontend (in new terminal)
-
-```bash
-cd client
-npm install  # if not done already
-npm run dev
-```
-
-Expected output:
-```
-VITE v... ready in ... ms
-
-➜  Local:   http://localhost:5173/
-```
-
-## Manual Test Cases
-
-### Test 1: Home Page
+#### 1.1 View Home Page
 1. Navigate to `http://localhost:5173`
 2. **Expected**: 
-   - Page loads with "Society Maintenance Charges Benchmarking" title
-   - Shows 4 stat cards (Societies, Avg Maintenance, Avg Units, Avg Area)
-   - All stats show 0 initially (no data yet)
-   - Quick links buttons are visible
+   - See welcome message
+   - See stats showing 0 societies and 18 benchmarks
+   - See quick links
 
-### Test 2: Admin Login
-1. Click "🔐 Admin Access" button on home page
-2. Modal appears asking for password
-3. Try with wrong password: should show "Invalid password" error
-4. Enter correct password: `admin123`
-5. **Expected**: Login successful, modal closes, admin panel accessible
+#### 1.2 View Comparison Page
+1. Click "Comparison" in header
+2. **Expected**: 
+   - Message "Showing 0 of 0 societies"
+   - Empty table (no data yet)
 
-### Test 3: Create Societies (Admin)
-1. After login, click "⚙️ Admin Panel" in navbar
-2. Go to "🏢 Manage Societies" tab
-3. Fill in society form:
-   - Name: "Ashoka Garden Apartments"
-   - Location: "Gurgaon - Sector 63"
-   - Total Flats: 150
-   - Total Area: 50000
-   - Year Established: 2010
-4. Click "Add Society"
-5. **Expected**: Success message, society appears in table below
+#### 1.3 View Insights Page
+1. Click "Insights" in header
+2. **Expected**: 
+   - "No data available" message (since no societies added yet)
 
-6. Repeat to add 2-3 more societies:
-   - Society 2: "Crown Heights", Sector 43, 200 flats, 60000 sq ft, 2005
-   - Society 3: "Meridian View", Sector 48, 100 flats, 35000 sq ft, 2015
+### 2. Admin Login & Setup
 
-### Test 4: Enter Benchmark Data (Admin)
-1. Click "📊 Manage Benchmarks" tab
-2. Select first society from dropdown
-3. Enter benchmark values (sample data):
-   - Annual building maintenance: 2.5
-   - Painting & whitewashing: 0.5
-   - Pest control: 1.0
-   - Lift maintenance: 0.3
-   - Water supply & treatment: 1.2
-   - Electricity for common areas: 0.8
-   - Sewage treatment: 0.4
-   - Security staff salaries: 1.5
-   - CCTV & monitoring: 0.2
-   - Fire safety & alarms: 0.1
-   - Gate maintenance: 0.15
-   - Garden & landscaping: 0.8
-   - Swimming pool maintenance: 0 (if not applicable)
-   - Gym facility: 0.3
-   - Staff salaries: 2.0
-   - Office supplies & insurance: 0.5
-   - Legal & compliance: 0.2
-   - Reserve fund: 1.0
+#### 2.1 Admin Login
+1. Click "Admin" in header
+2. Click "Admin" link or navigate to `/admin`
+3. Enter password: `admin123`
+4. Click "Login"
+5. **Expected**: 
+   - Login form disappears
+   - Admin panel appears with two tabs: "Manage Societies" and "Manage Benchmarks"
+   - "Logout" button visible
+
+#### 2.2 Add First Society
+1. In "Manage Societies" tab, fill form with:
+   - Name: `Green Valley Apartments`
+   - Location: `Sector 57, Gurgaon`
+   - Total Flats: `250`
+   - Total Area: `500000`
+   - Year Established: `2010`
+2. Click "Add Society"
+3. **Expected**: 
+   - Success message
+   - Society appears in "Existing Societies" table below
+   - Home page stats now show 1 society
+
+#### 2.3 Add Second Society
+1. Fill form with:
+   - Name: `Sunrise Towers`
+   - Location: `Sector 52, Gurgaon`
+   - Total Flats: `180`
+   - Total Area: `350000`
+   - Year Established: `2015`
+2. Click "Add Society"
+3. **Expected**: 
+   - Both societies visible in table
+   - Home stats show 2 societies
+
+#### 2.4 Add Third Society (Different Area)
+1. Fill form with:
+   - Name: `Maple Residency`
+   - Location: `Cybercity, Gurgaon`
+   - Total Flats: `320`
+   - Total Area: `600000`
+   - Year Established: `2008`
+2. Click "Add Society"
+3. **Expected**: 
+   - All 3 societies in table
+   - Home stats show 3 societies
+
+### 3. Add Benchmark Data
+
+#### 3.1 Add Data for First Society
+1. Go to "Manage Benchmarks" tab
+2. Select "Green Valley Apartments" from dropdown
+3. **Expected**: Form loads with all benchmark categories
+
+#### 3.2 Fill Benchmark Values for Green Valley
+Fill in the following values (per sq ft):
+
+**Building & Maintenance:**
+- Annual Building Maintenance: `2.5`
+- Painting & Whitewashing: `0.5`
+- Pest Control: `0.3`
+- Lift Maintenance: `1.2`
+
+**Utilities:**
+- Water Supply & Treatment: `1.8`
+- Electricity - Common Areas: `1.5`
+- Sewage Treatment: `0.4`
+
+**Security & Safety:**
+- Security Staff Salaries: `3.0`
+- CCTV & Monitoring: `0.8`
+- Fire Safety & Alarms: `0.2`
+- Gate Maintenance: `0.5`
+
+**Amenities & Recreation:**
+- Garden & Landscaping: `1.0`
+- Swimming Pool Maintenance: `0.6`
+- Gym Maintenance: `0.4`
+
+**Administration:**
+- Administrative Staff: `2.0`
+- Office Supplies & Insurance: `0.5`
+- Legal & Compliance: `0.3`
+- Reserve Fund: `1.0`
+
+**Total: ~19.6 per sq ft**
+
+1. Click "Save All Benchmarks"
+2. **Expected**: Success message
+
+#### 3.3 Add Data for Sunrise Towers (Similar but slightly lower)
+1. Select "Sunrise Towers"
+2. Fill with values 5-10% lower than Green Valley
+3. Click "Save All Benchmarks"
+
+#### 3.4 Add Data for Maple Residency (Slightly higher)
+1. Select "Maple Residency"
+2. Fill with values 5-10% higher than Green Valley
+3. Click "Save All Benchmarks"
+
+### 4. Test Public Features
+
+#### 4.1 View Updated Comparison Table
+1. Navigate to "Comparison" page
+2. **Expected**: 
+   - All 3 societies visible in table
+   - Shows: Name, Location, Total Flats, Total Area, Year Est., Building Maintenance charge
+   - Can scroll to see all columns
+
+#### 4.2 Test Filters
+1. Filter by location: Type "Sector 57"
+2. **Expected**: Only Green Valley Apartments shown
+
+1. Clear location, filter Min Flats: `200`
+2. **Expected**: Green Valley (250) and Maple (320) shown, Sunrise (180) hidden
+
+1. Filter Max Area: `400000`
+2. **Expected**: Only Sunrise Towers (350,000) shown
+
+#### 4.3 Test Sorting
+1. Sort by "Name"
+2. **Expected**: Alphabetical order (Green Valley → Maple → Sunrise)
+
+1. Sort by "Flats"
+2. **Expected**: Descending order (Maple 320 → Green Valley 250 → Sunrise 180)
+
+#### 4.4 View Insights Page
+1. Navigate to "Insights" page
+2. **Expected**: 
+   - Bar charts showing Mean vs Median for benchmarks
+   - Outlier detection chart
+   - Detailed insights box for each benchmark with stats
+   - Scatter plots showing charge vs number of flats
+
+#### 4.5 Analyze Statistics
+1. Look at "Annual Building Maintenance" insights
+2. **Expected**: 
+   - Mean value around 2.5-2.7
+   - One society (Maple) might show as slightly higher
+   - Std Dev shown
+
+### 5. Test Admin Updates
+
+#### 5.1 Delete a Society
+1. Go back to "Manage Societies" tab
+2. Click "Delete" for Sunrise Towers
+3. Confirm deletion
+4. **Expected**: 
+   - Success message
+   - Society removed from table
+   - Comparison page updated (2 societies now)
+   - Insights updated
+
+#### 5.2 Update Benchmark Data
+1. Go to "Manage Benchmarks" tab
+2. Select "Green Valley Apartments"
+3. Change one value (e.g., Building Maintenance from 2.5 to 3.0)
 4. Click "Save All Benchmarks"
-5. **Expected**: Success message
+5. **Expected**: 
+   - Success message
+   - Comparison table updated with new value
 
-6. Select 2nd society and enter similar/slightly different values
-7. Select 3rd society with some higher values (e.g., 3.5 for maintenance instead of 2.5)
+### 6. Test Admin Logout
 
-### Test 5: View Comparisons
-1. Click "Comparison" in navbar (logout if in admin, or use new browser window)
-2. **Expected**:
-   - See all 3 societies listed
-   - Benchmark comparison tables showing values for each society
-   - Variance percentages shown (positive/negative)
-   - Outlier detection for the society with higher values (⚠️ Outlier marker)
+#### 6.1 Logout
+1. Click "Logout" button in admin panel
+2. **Expected**: 
+   - Returns to admin login page
+   - Must re-enter password to access admin functions
 
-### Test 6: Apply Filters
-1. On Comparison page, use filters:
-   - Filter by location: "Sector 63" → only shows Ashoka Garden
-   - Filter by Min Flats: 150 → shows only societies with 150+ flats
-   - Filter by Max Area: 50000 → shows only smaller areas
-2. Click "Apply"
-3. **Expected**: Table updates to show only filtered societies
+#### 6.2 Verify Session Persistence
+1. Refresh page while logged in as admin
+2. **Expected**: Still logged in (session persists)
 
-### Test 7: View Insights
-1. Click "Insights" in navbar
-2. **Expected**:
-   - See statistics cards (3 societies, 17 benchmarks)
-   - Dropdown to select benchmark
-   - Statistics displayed (Average, Median, Min, Max, Std Dev)
-   - Bar chart showing distribution across societies
-   - Sorted table with deviation percentages
+1. Close browser tab, reopen admin page
+2. **Expected**: Must login again
 
-3. Change selected benchmark:
-   - Chart updates
-   - Statistics update
-   - Table updates
+### 7. Edge Cases & Error Handling
 
-### Test 8: Edit Society (Admin)
-1. Go back to Admin Panel
-2. Click "Edit" on a society
-3. Change the Total Flats to 180
-4. Click "Update Society"
-5. **Expected**: Success message, table updates
-6. Verify change on Comparison page (refresh if needed)
+#### 7.1 Invalid Login
+1. Try login with wrong password
+2. **Expected**: Error message "Invalid password"
 
-### Test 9: Delete Society (Admin)
-1. In Admin Panel, click "Delete" on a society
-2. Confirm deletion
-3. **Expected**: Success message, society removed from table
-4. Verify it's gone from Comparison/Insights pages (refresh)
+#### 7.2 Missing Required Fields
+1. Try adding society without name
+2. **Expected**: Required fields validation (handled by HTML5)
 
-### Test 10: Logout
-1. Click "Logout" button in navbar (appears after admin login)
-2. **Expected**: Button disappears, "Admin Access" button returns
-3. Try accessing `/admin` directly → should redirect to home
+#### 7.3 Duplicate Society Name
+1. Try adding society with same name as existing
+2. **Expected**: Either allow it or show error (depends on backend validation)
 
-## API Testing (Optional)
+#### 7.4 Large Numbers
+1. Add society with:
+   - Flats: `5000`
+   - Area: `10000000`
+2. **Expected**: Handles large numbers correctly in charts and tables
 
-Test directly with curl:
+#### 7.5 Decimal Benchmarks
+1. Add benchmark value: `1.567` (3 decimal places)
+2. **Expected**: Stored and displayed correctly
+
+### 8. Visual Testing
+
+#### 8.1 Responsive Design
+1. Resize browser window (test at 320px, 768px, 1200px width)
+2. **Expected**: Layout adjusts properly, no overflow
+
+#### 8.2 Chart Display
+1. View Insights page
+2. **Expected**: All charts render properly, legends visible, tooltips work on hover
+
+#### 8.3 Table Scrolling
+1. On mobile/narrow viewport, view Comparison table
+2. **Expected**: Horizontal scroll works, table is readable
+
+### 9. Performance Testing
+
+#### 9.1 Load Times
+1. Open Network tab in browser DevTools
+2. Load home page
+3. **Expected**: 
+   - Page loads in <2 seconds
+   - API calls return quickly
+
+#### 9.2 Many Societies
+1. Via API or script, add 20 societies with full benchmark data
+2. Load Comparison page
+3. **Expected**: Page still loads reasonably fast, no lag
+
+### 10. Browser Compatibility
+
+Test on:
+- Chrome (latest)
+- Firefox (latest)
+- Safari (if on Mac)
+
+**Expected**: All features work, styling consistent
+
+## Automated Health Checks
 
 ```bash
-# Get all societies
+# Health check backend
+curl http://localhost:5000/health
+
+# Expected response:
+# {"status":"OK"}
+
+# Check public API
 curl http://localhost:5000/api/societies
 
-# Get all benchmarks
-curl http://localhost:5000/api/benchmarks
-
-# Get comparison data
-curl "http://localhost:5000/api/comparison"
-
-# Get insights summary
-curl http://localhost:5000/api/insights/summary
-
-# Admin login
-curl -X POST http://localhost:5000/api/admin/login \
-  -H "Content-Type: application/json" \
-  -d '{"password":"admin123"}' \
-  -c cookies.txt
-
-# Create society (needs admin session)
-curl -X POST http://localhost:5000/api/admin/societies \
-  -H "Content-Type: application/json" \
-  -b cookies.txt \
-  -d '{
-    "name":"Test Society",
-    "location":"Gurgaon",
-    "totalFlats":100,
-    "totalArea":30000,
-    "yearEstablished":2020
-  }'
+# Expected response:
+# JSON array of societies
 ```
 
-## Expected Results
+## Test Data Summary
 
-✓ **Home Page**: Loads with correct statistics
-✓ **Admin Auth**: Login/logout works with correct password validation
-✓ **Society CRUD**: Can create, read, update, delete societies
-✓ **Benchmark Data**: Can enter and save benchmark values
-✓ **Comparisons**: Shows accurate data and calculations
-✓ **Filters**: Work correctly with proper data filtering
-✓ **Insights**: Charts render and statistics are calculated
-✓ **Outlier Detection**: Identifies unusual values correctly
-✓ **Responsive**: Works on desktop (mobile testing optional)
+After all tests, you should have:
+- 2 societies (Green Valley, Maple Residency)
+- 18 benchmark categories
+- Full benchmark data for both societies
+- Comparison, filtering, sorting, and analytics all working
+- Admin login/logout functional
 
-## Troubleshooting
+## Checklist
 
-### MongoDB Connection Error
-```
-✗ MongoDB connection error: connect ECONNREFUSED
-```
-**Solution**: Start MongoDB with `docker-compose up -d`
-
-### Port Already in Use
-```
-Error: listen EADDRINUSE: address already in use :::5000
-```
-**Solution**: Kill existing process or use different port: `PORT=5001 npm start`
-
-### CORS Error on Frontend
-```
-Access to XMLHttpRequest blocked by CORS
-```
-**Solution**: Ensure backend is running and check vite proxy config in `vite.config.js`
-
-### Build Issues
-```bash
-# Clear and reinstall
-rm -rf node_modules package-lock.json
-npm install
-npm start/run dev
-```
-
-## Performance Notes
-
-- First load may take a few seconds (dependencies loading)
-- Charts render smoothly with 3+ societies
-- Filtering is instant once data is loaded
-- Admin operations complete within 1-2 seconds
-
-## Cleanup
-
-To stop services:
-
-```bash
-# Stop backend: Ctrl+C in terminal
-
-# Stop frontend: Ctrl+C in terminal
-
-# Stop MongoDB
-docker-compose down
-```
+- [ ] Home page loads with correct stats
+- [ ] Comparison page works with 3+ societies
+- [ ] All filters function correctly
+- [ ] Sorting works (by name, flats, area)
+- [ ] Insights page displays charts
+- [ ] Admin login/logout works
+- [ ] Can add societies
+- [ ] Can add/update benchmarks
+- [ ] Can delete societies
+- [ ] Session persists on page refresh
+- [ ] Responsive design works
+- [ ] Error handling displays messages
+- [ ] Charts display properly
+- [ ] No console errors
 
 ## Success Criteria
 
-- [ ] All 3 societies can be created and viewed
-- [ ] Admin can enter benchmark data for all benchmarks
-- [ ] Comparison page shows accurate values and percentages
-- [ ] Filters work correctly
-- [ ] Insights page displays charts without errors
-- [ ] Outlier detection marks appropriate values
-- [ ] Admin login/logout works
-- [ ] No console errors
+All tests pass when:
+1. All UI elements are interactive and responsive
+2. Data persists across page refreshes
+3. Admin operations update public views immediately
+4. Charts and statistics are calculated correctly
+5. No JavaScript errors in console
+6. Performance is acceptable (< 2s page load)
 
-## Notes
+## Troubleshooting During Testing
 
-- Initial data seeding creates 17 benchmarks automatically
-- Each society can have multiple benchmark entries
-- Statistics are calculated in real-time from the database
-- Outliers are detected using Interquartile Range (IQR) method
-- All data is persisted in MongoDB
+**Problem**: Can't login to admin
+- Check password is `admin123` (case-sensitive)
+- Restart backend server
+
+**Problem**: Societies not showing in comparison
+- Ensure benchmarks are saved for the society
+- Check backend logs for errors
+- Refresh page
+
+**Problem**: Charts not displaying
+- Check browser console for errors
+- Ensure data was added correctly
+- Try clearing browser cache
+
+**Problem**: CORS errors
+- Verify backend is running on port 5000
+- Verify frontend is on port 5173
+- Check CORS configuration in server/index.js
+
+---
+
+**Testing Duration**: ~30-45 minutes for complete test suite
+
+**Last Updated**: 2024

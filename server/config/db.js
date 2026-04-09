@@ -1,16 +1,13 @@
 import mongoose from 'mongoose';
 
-const connectDB = async () => {
+export const connectDB = async () => {
   try {
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://admin:admin123@localhost:27017/societycomparison?authSource=admin';
-
-    await mongoose.connect(mongoUri);
-    console.log('✓ MongoDB connected successfully');
-    return mongoose.connection;
+    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/society-comparison';
+    await mongoose.connect(uri);
+    console.log('MongoDB connected');
+    return true;
   } catch (error) {
-    console.error('✗ MongoDB connection error:', error.message);
+    console.error('MongoDB connection error:', error);
     process.exit(1);
   }
 };
-
-export default connectDB;

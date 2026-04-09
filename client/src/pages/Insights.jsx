@@ -1,265 +1,145 @@
-import { useEffect, useState } from 'react';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
-import { getComparisonData } from '../services/api';
+import React, { useEffect, useState } from 'react';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter } from 'recharts';
+import { publicAPI } from '../services/api';
 
-function Insights() {
-  const [comparisonData, setComparisonData] = useState(null);
+export default function Insights() {
+  const [insights, setInsights] = useState(null);
+  const [trends, setTrends] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedBenchmark, setSelectedBenchmark] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadInsights = async () => {
       try {
-        const res = await getComparisonData();
-        setComparisonData(res.data);
-        if (res.data?.insights?.length > 0) {
-          setSelectedBenchmark(res.data.insights[0]);
-        }
-      } catch (err) {
-        console.error('Error fetching data:', err);
+        const [insightsRes, trendsRes] = await Promise.all([
+          publicAPI.getInsights(),
+          publicAPI.getTrends(),
+        ]);
+
+        setInsights(insightsRes.data);
+        setTrends(trendsRes.data);
+      } catch (error) {
+        console.error('Failed to load insights:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    loadInsights();
   }, []);
 
   if (loading) {
-    return (
-      <div className="page">
-        <div className="loading">
-          <div className="loader"></div>
-          Loading...
-        </div>
-      </div>
-    );
+    return <div className="container loading">Loading insights...</div>;
   }
 
-  if (!comparisonData?.insights?.length) {
-    return (
-      <div className="page">
-        <h1>📈 Insights & Trends</h1>
-        <div className="alert alert-info">No data available for insights yet.</div>
-      </div>
-    );
+  if (!insights || !trends) {
+    return <div className="container loading">No data available</div>;
   }
 
-  const chartData = selectedBenchmark?.data?.map((item) => ({
-    name: item.societyName.substring(0, 15),
-    value: item.value,
-    fullName: item.societyName,
-  })) || [];
+  // Prepare data for charts
+  const benchmarksList = Object.entries(insights).map(([_, insight]) => ({
+    name: insight.name.substring(0, 20),
+    fullName: insight.name,
+    mean: parseFloat(insight.stats.mean.toFixed(2)),
+    median: parseFloat(insight.stats.median.toFixed(2)),
+    stdDev: parseFloat(insight.stats.stdDev.toFixed(2)),
+    outliers: insight.outliersCount,
+  }));
 
-  const categoryStats = comparisonData.insights.reduce((acc, insight) => {
-    const existing = acc.find((c) => c.category === insight.category);
-    if (existing) {
-      existing.avg = (existing.avg + insight.stats?.mean) / 2;
-    } else {
-      acc.push({
-        category: insight.category,
-        avg: insight.stats?.mean || 0,
-      });
-    }
-    return acc;
-  }, []);
+  const trendChartData = trends.slice(0, 3).map(trend => ({
+    benchmarkName: trend.benchmarkName.substring(0, 15),
+    data: trend.values.map(v => ({
+      x: v.flats,
+      y: v.value,
+      society: v.societyName,
+      area: v.area,
+    })),
+  }));
 
   return (
-    <div className="page">
-      <h1>📈 Insights & Trends Analysis</h1>
+    <div className="container">
+      <div className="card">
+        <h2>Analytics & Insights</h2>
 
-      <h2>Statistics Overview</h2>
-      <div className="cards-grid">
-        <div className="card">
-          <div className="stat">
-            <div className="stat-value">{comparisonData.societies.length}</div>
-            <div className="stat-label">Total Societies</div>
+        {benchmarksList.length > 0 && (
+          <div className="chart-container">
+            <h3>Benchmark Statistics (Mean vs Median)</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={benchmarksList}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="mean" fill="#3498db" name="Mean" />
+                <Bar dataKey="median" fill="#2ecc71" name="Median" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-        </div>
-        <div className="card">
-          <div className="stat">
-            <div className="stat-value">{comparisonData.insights.length}</div>
-            <div className="stat-label">Benchmarks Tracked</div>
-          </div>
-        </div>
-      </div>
+        )}
 
-      <h2>Benchmark Selection</h2>
-      <div className="filters">
-        <select
-          value={selectedBenchmark?.benchmarkId || ''}
-          onChange={(e) => {
-            const selected = comparisonData.insights.find(
-              (i) => i.benchmarkId === e.target.value
-            );
-            setSelectedBenchmark(selected);
-          }}
-          style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #ddd' }}
-        >
-          {comparisonData.insights.map((insight) => (
-            <option key={insight.benchmarkId} value={insight.benchmarkId}>
-              {insight.benchmarkName}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {selectedBenchmark && (
-        <>
-          <h2>{selectedBenchmark.benchmarkName}</h2>
-          <div className="card">
-            <h3>Statistics</h3>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '1rem',
-              }}
-            >
-              <div>
-                <strong>Average:</strong> ₹{selectedBenchmark.stats?.mean?.toFixed(2)}
-              </div>
-              <div>
-                <strong>Median:</strong> ₹{selectedBenchmark.stats?.median?.toFixed(2)}
-              </div>
-              <div>
-                <strong>Min:</strong> ₹{selectedBenchmark.stats?.min?.toFixed(2)}
-              </div>
-              <div>
-                <strong>Max:</strong> ₹{selectedBenchmark.stats?.max?.toFixed(2)}
-              </div>
-              <div>
-                <strong>Std Dev:</strong> ₹{selectedBenchmark.stats?.stdDev?.toFixed(2)}
-              </div>
-              <div>
-                <strong>Data Points:</strong> {selectedBenchmark.stats?.count}
-              </div>
-            </div>
-          </div>
-
-          <h3 style={{ marginTop: '2rem' }}>Distribution Chart</h3>
-          <div style={{ background: 'white', padding: '1rem', borderRadius: '8px' }}>
-            {chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart
-                  data={chartData}
-                  margin={{ top: 20, right: 30, left: 0, bottom: 60 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="name"
-                    angle={-45}
-                    textAnchor="end"
-                    height={100}
-                    interval={0}
-                  />
-                  <YAxis />
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (active && payload && payload[0]) {
-                        return (
-                          <div
-                            style={{
-                              background: 'white',
-                              padding: '0.5rem',
-                              border: '1px solid #ccc',
-                              borderRadius: '4px',
-                            }}
-                          >
-                            <p>{payload[0].payload.fullName}</p>
-                            <p>₹{payload[0].value.toFixed(2)}</p>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Bar dataKey="value" fill="#3498db" name="Value" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="alert alert-info">No data to display</div>
-            )}
-          </div>
-
-          <h3 style={{ marginTop: '2rem' }}>Society Values (Sorted)</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Society</th>
-                <th>Value</th>
-                <th>Deviation from Mean</th>
-              </tr>
-            </thead>
-            <tbody>
-              {selectedBenchmark.data
-                ?.sort((a, b) => b.value - a.value)
-                .map((item) => {
-                  const deviation = (
-                    ((item.value - selectedBenchmark.stats.mean) /
-                      selectedBenchmark.stats.mean) *
-                    100
-                  ).toFixed(2);
-                  const isOutlier = selectedBenchmark.outliers?.includes(item.value);
-
-                  return (
-                    <tr key={item.societyId} className={isOutlier ? 'outlier' : ''}>
-                      <td>{item.societyName}</td>
-                      <td>₹{item.value.toFixed(2)}</td>
-                      <td>
-                        {deviation > 0 ? (
-                          <span style={{ color: 'red' }}>
-                            +{deviation}% {isOutlier && '⚠️ Outlier'}
-                          </span>
-                        ) : (
-                          <span style={{ color: 'green' }}>
-                            {deviation}% {isOutlier && '⚠️ Outlier'}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </table>
-        </>
-      )}
-
-      <h2 style={{ marginTop: '2rem' }}>Category Analysis</h2>
-      <div style={{ background: 'white', padding: '1rem', borderRadius: '8px' }}>
-        {categoryStats.length > 0 ? (
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={categoryStats} margin={{ top: 20, right: 30, left: 0, bottom: 80 }}>
+        <div className="chart-container">
+          <h3>Outlier Detection by Benchmark</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={benchmarksList}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="category"
-                angle={-45}
-                textAnchor="end"
-                height={100}
-                interval={0}
-              />
+              <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="avg" fill="#27ae60" name="Avg Value" />
+              <Bar dataKey="outliers" fill="#e74c3c" name="Outliers (±2σ)" />
             </BarChart>
           </ResponsiveContainer>
-        ) : (
-          <div className="alert alert-info">No category data available</div>
+        </div>
+
+        <div style={{ marginTop: '30px' }}>
+          <h3>Detailed Insights by Benchmark</h3>
+          {benchmarksList.map((benchmark, idx) => (
+            <div key={idx} style={{
+              marginBottom: '20px',
+              padding: '15px',
+              backgroundColor: '#ecf0f1',
+              borderRadius: '4px',
+            }}>
+              <h4>{benchmark.fullName}</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginTop: '10px' }}>
+                <div><strong>Mean:</strong> {benchmark.mean}</div>
+                <div><strong>Median:</strong> {benchmark.median}</div>
+                <div><strong>Std Dev:</strong> {benchmark.stdDev.toFixed(2)}</div>
+                <div><strong>Outliers:</strong> {benchmark.outliers}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {trendChartData.length > 0 && (
+          <div className="chart-container" style={{ marginTop: '30px' }}>
+            <h3>Charge vs Number of Flats (Sample Benchmarks)</h3>
+            {trendChartData.map((trend, idx) => (
+              <div key={idx} style={{ marginBottom: '30px' }}>
+                <h4>{trend.benchmarkName}</h4>
+                <ResponsiveContainer width="100%" height={250}>
+                  <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" dataKey="x" name="Number of Flats" />
+                    <YAxis type="number" dataKey="y" name="Charge (per sq ft)" />
+                    <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+                    <Scatter name="Societies" data={trend.data} fill="#3498db" />
+                  </ScatterChart>
+                </ResponsiveContainer>
+              </div>
+            ))}
+          </div>
         )}
+
+        <div style={{ marginTop: '30px', padding: '15px', backgroundColor: '#d4edda', borderRadius: '4px' }}>
+          <h3>Interpretation Guide</h3>
+          <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
+            <li><strong>Mean:</strong> Average maintenance charge across all societies</li>
+            <li><strong>Median:</strong> Middle value when charges are sorted (less affected by extremes)</li>
+            <li><strong>Std Dev:</strong> How much variation exists in charges</li>
+            <li><strong>Outliers:</strong> Societies with unusually high or low charges (beyond ±2 standard deviations)</li>
+          </ul>
+        </div>
       </div>
     </div>
   );
 }
-
-export default Insights;
