@@ -14,6 +14,7 @@ export const publicAPI = {
   getComparison: () => api.get('/comparison'),
   getInsights: () => api.get('/insights'),
   getTrends: () => api.get('/trends'),
+  exportExcel: () => api.get('/export/excel', { responseType: 'blob' }),
 };
 
 export const adminAPI = {

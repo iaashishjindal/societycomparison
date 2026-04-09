@@ -2,6 +2,7 @@ import express from 'express';
 import { getSocieties, getSocietyById } from '../controllers/societyController.js';
 import { getBenchmarks } from '../controllers/benchmarkController.js';
 import { getComparisonData, getInsights, getTrendsData } from '../controllers/insightsController.js';
+import { exportExcel } from '../controllers/exportController.js';
 
 const router = express.Router();
 
@@ -11,5 +12,6 @@ router.get('/benchmarks', getBenchmarks);
 router.get('/comparison', getComparisonData);
 router.get('/insights', getInsights);
 router.get('/trends', getTrendsData);
+router.get('/export/excel', exportExcel);
 
 export default router;

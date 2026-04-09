@@ -13,6 +13,7 @@ export default function Comparison() {
   });
   const [sortBy, setSortBy] = useState('name');
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -70,6 +71,27 @@ export default function Comparison() {
     setFilters(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleExportExcel = async () => {
+    setExporting(true);
+    try {
+      const res = await publicAPI.exportExcel();
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const filename = `society-comparison-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (loading) {
     return <div className="container loading">Loading comparison data...</div>;
   }
@@ -81,7 +103,25 @@ export default function Comparison() {
   return (
     <div className="container">
       <div className="card">
-        <h2>Society Comparison</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+          <h2 style={{ margin: 0 }}>Society Comparison</h2>
+          <button
+            onClick={handleExportExcel}
+            disabled={exporting}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: exporting ? '#95a5a6' : '#27ae60',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: exporting ? 'not-allowed' : 'pointer',
+              fontWeight: 'bold',
+              fontSize: '14px',
+            }}
+          >
+            {exporting ? 'Exporting...' : 'Export to Excel'}
+          </button>
+        </div>
 
         <div className="filters">
           <input
